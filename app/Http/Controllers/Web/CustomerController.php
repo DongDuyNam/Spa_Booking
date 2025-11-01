@@ -59,4 +59,30 @@ class CustomerController extends Controller
                 ->with('error', 'Lỗi khi xóa khách hàng: ' . $e->getMessage());
         }
     }
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'full_name'     => 'required|string|max:255',
+            'email'         => 'required|email|unique:users,email',
+            'phone_number'  => 'nullable|string|max:20',
+            'gender'        => 'nullable|string|max:10',
+            'branch_id'     => 'nullable|integer',
+        ]);
+
+        $customer = new User();
+        $customer->full_name     = $request->full_name;
+        $customer->email         = $request->email;
+        $customer->phone_number  = $request->phone_number;
+        $customer->gender        = $request->gender;
+        $customer->branch_id     = $request->branch_id;
+        $customer->role_id       = 3; 
+        $customer->status        = 1;
+        $customer->password_hash      = bcrypt('123456'); 
+        $customer->save();
+
+        return redirect()
+            ->route('admin.customers.index')
+            ->with('success', 'Thêm khách hàng mới thành công!');
+    }
 }

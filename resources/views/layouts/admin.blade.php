@@ -37,10 +37,8 @@
                 Khách hàng
             </a>
 
-            <a href="#" class="block rounded-lg px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white">Doanh
-                thu</a>
-            <a href="#" class="block rounded-lg px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white">Khuyến mãi /
-                Ưu đãi</a>
+            <a href="#" class="block rounded-lg px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white">Doanh thu</a>
+            <a href="#" class="block rounded-lg px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white">Khuyến mãi / Ưu đãi</a>
             <a href="#" class="block rounded-lg px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white">Đánh giá</a>
             <a href="#" class="block rounded-lg px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white">Cài đặt</a>
         </nav>
@@ -54,10 +52,8 @@
         </div>
     </aside>
 
-    {{-- Phần nội dung bên phải --}}
+    {{-- Nội dung --}}
     <main class="flex-1 flex flex-col">
-
-        {{-- Top bar --}}
         <header class="w-full bg-[#FFF0F3] border-b border-pink-100 flex items-center justify-between px-6 py-4">
             <div>
                 <div class="text-sm text-gray-500">Xin chào,</div>
@@ -68,8 +64,7 @@
             <div class="flex items-center space-x-4">
                 <div>
                     <label class="block text-xs text-gray-500 mb-1">Chi nhánh</label>
-                    <select
-                        class="bg-white border border-pink-200 text-gray-700 text-sm rounded-lg px-3 py-2 focus:ring-pink-300 focus:outline-none">
+                    <select class="bg-white border border-pink-200 text-gray-700 text-sm rounded-lg px-3 py-2 focus:ring-pink-300 focus:outline-none">
                         <option>The Muse Beauty Spa - Q1</option>
                         <option>Greenleaf Wellness - Q3</option>
                         <option>Queen Nails & Hair - HN</option>
@@ -87,18 +82,32 @@
             </div>
         </header>
 
-        {{-- Nội dung động --}}
         <section class="flex-1 p-6">
             @yield('content')
         </section>
     </main>
-</body>
-@if (session('success'))
-    <div x-data="{ show: true }" x-show="show" x-transition.opacity.duration.500ms
-        class="fixed top-4 right-4 bg-green-100 text-green-700 px-4 py-2 rounded-lg shadow-lg">
-        <span>{{ session('success') }}</span>
-        <button @click="show = false" class="ml-3 text-green-600 hover:text-green-800 font-semibold">×</button>
-    </div>
-@endif
 
+    {{-- Toast --}}
+    <div x-data="{ show: false, message: '', type: 'success' }" x-show="show" x-transition.opacity.duration.300ms
+        x-init="
+            window.addEventListener('toast', (event) => {
+                message = event.detail.message;
+                type = event.detail.type || 'success';
+                show = true;
+                setTimeout(() => show = false, 3000);
+            });
+        " class="fixed top-5 right-5 z-50" x-cloak>
+        <div :class="{
+                'bg-green-100 text-green-800 border-green-300': type === 'success',
+                'bg-red-100 text-red-800 border-red-300': type === 'error',
+                'bg-yellow-100 text-yellow-800 border-yellow-300': type === 'warning'
+            }" class="px-4 py-3 rounded-lg shadow-md border flex items-center space-x-3">
+            <span x-text="message" class="font-medium"></span>
+        </div>
+    </div>
+
+    {{-- Load AlpineJS & Script Stack --}}
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    @stack('scripts')
+</body>
 </html>
