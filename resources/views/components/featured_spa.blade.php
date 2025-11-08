@@ -5,10 +5,10 @@
 
     <div class="max-w-screen-xl mx-auto px-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         @foreach ([
-            ['img' => '/image/trang_spa.jpg', 'name' => 'Trang Spa', 'loc' => 'Hải Phòng'],
-            ['img' => '/image/cam_on_spa.jpg', 'name' => 'Cam On Spa', 'loc' => 'Hà Nội'],
-            ['img' => '/image/trustskin_spa.jpg', 'name' => 'Trustskin Spa', 'loc' => 'Hà Nội'],
-            ['img' => '/image/ben_shine_spa.jpg', 'name' => 'Ben Shine Spa', 'loc' => 'Hà Nội']
+            ['img' => '/image/trang_spa.jpg', 'name' => 'Chi nhánh', 'loc' => 'Hải Phòng'],
+            ['img' => '/image/cam_on_spa.jpg', 'name' => 'Chi nhánh', 'loc' => 'Hà Nội'],
+            ['img' => '/image/trustskin_spa.jpg', 'name' => 'Chi nhánh', 'loc' => 'Hà Nội'],
+            ['img' => '/image/ben_shine_spa.jpg', 'name' => 'Chi nhánh', 'loc' => 'Hà Nội']
         ] as $spa)
             <div class="bg-white rounded-xl shadow-lg border border-primary-100 hover:shadow-xl transition duration-300">
                 <img class="w-full h-40 object-cover rounded-t-xl" src="{{ $spa['img'] }}" alt="{{ $spa['name'] }}">

@@ -2,17 +2,17 @@
 
 @section('content')
     <div x-data="customerPage()" class="bg-white shadow-md rounded-xl p-6 border border-pink-100 relative">
-        
+
         <div class="mb-4">
             <h2 class="text-2xl font-bold text-gray-700">Danh sách khách hàng</h2>
-            
+
             <div class="flex justify-between items-center mt-3">
-                
+
                 <button @click="openCreate()"
                     class="bg-pink-500 text-white px-4 py-2 rounded-lg hover:bg-pink-600 transition flex items-center space-x-1">
                     ➕ Thêm khách hàng
                 </button>
-                
+
                 <form method="GET" action="{{ route('admin.customers.index') }}" class="flex space-x-2">
                     <input type="text" name="keyword" placeholder="Tìm kiếm..." value="{{ request('keyword') }}"
                         class="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-pink-300 focus:outline-none">
@@ -49,7 +49,7 @@
                             <td class="px-6 py-3">
                                 <span
                                     class="px-3 py-1 text-sm rounded-full 
-                                            {{ $c->status == 1 ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-500' }}">
+                                                            {{ $c->status == 1 ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-500' }}">
                                     {{ $c->status == 1 ? 'Hoạt động' : 'Ngưng' }}
                                 </span>
                             </td>
@@ -132,11 +132,11 @@
         </template>
 
         {{-- Modal chi tiết --}}
-        <template x-if="detailModal">
-            <div class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50"
-                x-transition.opacity>
-                <div class="bg-white rounded-xl p-6 w-[480px] shadow-lg transform transition-all scale-95"
-                    x-transition.scale @click.away="detailModal = false">
+        <template x-teleport="body">
+            <div x-cloak x-show="detailModal"
+                class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[9999]"
+                x-transition.opacity @keydown.escape.window="detailModal = false" @click.self="detailModal = false">
+                <div class="bg-white rounded-xl p-6 w-[480px] shadow-lg" x-transition.scale>
                     <h3 class="text-xl font-semibold text-gray-800 mb-4">Thông tin khách hàng</h3>
                     <div class="space-y-2 text-sm">
                         <p><strong>Họ tên:</strong> <span x-text="selected.full_name"></span></p>
@@ -156,11 +156,11 @@
         </template>
 
         {{-- Modal chỉnh sửa --}}
-        <template x-if="editModal">
-            <div class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50"
-                x-transition.opacity>
-                <div class="bg-white rounded-xl p-6 w-[480px] shadow-lg transform transition-all scale-95"
-                    x-transition.scale @click.away="editModal = false">
+        <template x-teleport="body">
+            <div x-cloak x-show="editModal"
+                class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[9999]"
+                x-transition.opacity @keydown.escape.window="editModal = false" @click.self="editModal = false">
+                <div class="bg-white rounded-xl p-6 w-[480px] shadow-lg" x-transition.scale>
                     <h3 class="text-xl font-semibold text-gray-800 mb-4">Chỉnh sửa khách hàng</h3>
                     <form method="POST" :action="'/admin/customers/' + selected.user_id">
                         @csrf
@@ -183,6 +183,11 @@
                                     class="w-full border rounded-lg px-3 py-2 focus:ring-pink-300 focus:outline-none">
                             </div>
                             <div>
+                                <label class="text-sm font-medium text-gray-600">Chi nhánh</label>
+                                <input type="number" name="branch_id" x-model="selected.branch_id"
+                                    class="w-full border rounded-lg px-3 py-2 focus:ring-pink-300 focus:outline-none">
+                            </div>
+                            <div>
                                 <label class="text-sm font-medium text-gray-600">Trạng thái</label>
                                 <select name="status" x-model="selected.status"
                                     class="w-full border rounded-lg px-3 py-2 focus:ring-pink-300 focus:outline-none">
@@ -191,7 +196,6 @@
                                 </select>
                             </div>
                         </div>
-
                         <div class="mt-6 text-right">
                             <button type="button" @click="editModal = false"
                                 class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 mr-2">
@@ -205,35 +209,35 @@
                 </div>
             </div>
         </template>
-    </div>
 
-    {{-- Script AlpineJS --}}
-    @push('scripts')
-        <script src="//unpkg.com/alpinejs" defer></script>
-        <script>
-            function customerPage() {
-                return {
-                    //... giữ nguyên các trạng thái modal
-                    selected: {},
-                    createModal: false,
-                    detailModal: false,
-                    editModal: false,
 
-                    openCreate() {
-                        this.createModal = true;
-                    },
-                    
-                    // Thêm data vào Modal Xem và Sửa
-                    openDetail(cust) {
-                        this.selected = cust;
-                        this.detailModal = true;
-                    },
-                    openEdit(cust) {
-                        this.selected = JSON.parse(JSON.stringify(cust));
-                        this.editModal = true;
-                    }
-                };
-            }
-        </script>
-    @endpush
+        {{-- Script AlpineJS --}}
+        @push('scripts')
+            <script src="//unpkg.com/alpinejs" defer></script>
+            <script>
+                function customerPage() {
+                    return {
+                        //... giữ nguyên các trạng thái modal
+                        selected: {},
+                        createModal: false,
+                        detailModal: false,
+                        editModal: false,
+
+                        openCreate() {
+                            this.createModal = true;
+                        },
+
+                        // Thêm data vào Modal Xem và Sửa
+                        openDetail(cust) {
+                            this.selected = cust;
+                            this.detailModal = true;
+                        },
+                        openEdit(cust) {
+                            this.selected = JSON.parse(JSON.stringify(cust));
+                            this.editModal = true;
+                        }
+                    };
+                }
+            </script>
+        @endpush
 @endsection

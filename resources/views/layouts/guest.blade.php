@@ -21,23 +21,32 @@
             font-family: 'Lora', serif;
         }
     </style>
+
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body style="background-image: url('{{ asset('image/image_in_login/bg-login.jpg') }}'); background-size: cover; background-position: center;" 
+<body style="background-image: url('{{ asset('image/image_in_login/bg-login.jpg') }}');
+             background-size: cover;
+             background-position: center;
+             background-repeat: no-repeat;"
       class="font-serif text-gray-900 antialiased">
 
-    <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100"> 
-        <div>
-            <a href="/">
-                <x-application-logo class="w-50 h-auto fill-current text-gray-500" />
+    <div class="min-h-screen flex flex-col justify-center items-center bg-black/10 backdrop-blur-sm px-4">
+        <!-- Logo -->
+        <div class="text-center mb-8">
+            <a href="/" class="inline-block">
+                <img src="{{ asset('image/logo.png') }}" 
+                     alt="AnhDuong Spa" 
+                     class="w-36 sm:w-44 md:w-80 h-auto mx-auto drop-shadow-lg">
             </a>
         </div>
-        <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-primary-250 shadow-md overflow-hidden sm:rounded-lg">
+
+        <!-- Login Card -->
+        <div class="w-full sm:max-w-md px-6 py-8 bg-white/90 rounded-2xl shadow-2xl backdrop-blur-md border border-white/30">
             {{ $slot }}
         </div>
     </div>
-</body>
 
+</body>
 </html>

@@ -7,6 +7,7 @@ use App\Http\Controllers\Web\CustomerController;
 use App\Http\Controllers\Web\LoginController;
 use App\Http\Controllers\Web\RegisterController;
 use App\Http\Controllers\Web\ScheduleController;
+use App\Http\Controllers\Web\BookingController;
 
 // Trang chủ
 Route::get('/', function () {
@@ -20,6 +21,11 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
 Route::post('/register', [RegisterController::class, 'register']);
+
+
+Route::get('/', [BookingController::class, 'index'])->name('home');
+Route::post('/booking', [BookingController::class, 'store'])->name('booking.store');
+
 
 // ================== DASHBOARD (SAU KHI LOGIN) ==================
 Route::middleware('auth')->group(function () {

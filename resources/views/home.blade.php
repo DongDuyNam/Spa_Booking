@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Trang chủ Beauty Booking')
+@section('title', 'Trang chủ AnhDuongSpa')
 
 @section('content')
     @include('components.hero')

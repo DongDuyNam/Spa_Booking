@@ -1,83 +1,77 @@
 <?php
 
-/**
- * Created by Reliese Model.
- */
-
 namespace App\Models;
 
-use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Model;
 
-/**
- * Class Appointment
- * 
- * @property int $appointment_id
- * @property int|null $customer_id
- * @property int|null $staff_id
- * @property int|null $branch_id
- * @property Carbon|null $scheduled_time
- * @property int|null $duration_minutes
- * @property float|null $total_amount
- * @property string|null $status
- * 
- * @property User|null $user
- * @property Branch|null $branch
- * @property Collection|Appointmentdetail[] $appointmentdetails
- * @property Collection|Payment[] $payments
- * @property Collection|Review[] $reviews
- *
- * @package App\Models
- */
 class Appointment extends Model
 {
-	protected $table = 'appointments';
-	protected $primaryKey = 'appointment_id';
-	public $timestamps = false;
+    use HasFactory;
 
-	protected $casts = [
-		'customer_id' => 'int',
-		'staff_id' => 'int',
-		'branch_id' => 'int',
-		'scheduled_time' => 'datetime',
-		'duration_minutes' => 'int',
-		'total_amount' => 'float'
-	];
+    protected $table = 'appointments';
+    protected $primaryKey = 'appointment_id';
+    public $timestamps = true;
 
-	protected $fillable = [
-		'customer_id',
-		'staff_id',
-		'branch_id',
-		'scheduled_time',
-		'duration_minutes',
-		'total_amount',
-		'status'
-	];
+    protected $casts = [
+        'customer_id' => 'int',
+        'staff_id' => 'int',
+        'branch_id' => 'int',
+        'appointment_date' => 'datetime',
+        'duration_minutes' => 'int',
+        'total_amount' => 'float',
+    ];
 
-	public function user()
-	{
-		return $this->belongsTo(User::class, 'staff_id');
-	}
+    protected $fillable = [
+        'customer_id',
+        'staff_id',
+        'branch_id',
+        'appointment_date',
+        'duration_minutes',
+        'note',
+        'status',
+    ];
 
-	public function branch()
-	{
-		return $this->belongsTo(Branch::class);
-	}
+    // 🔹 Khách hàng đặt lịch
+    public function customer()
+    {
+        return $this->belongsTo(User::class, 'customer_id');
+    }
 
-	public function appointmentdetails()
-	{
-		return $this->hasMany(Appointmentdetail::class);
-	}
+    // 🔹 Nhân viên thực hiện
+    public function staff()
+    {
+        return $this->belongsTo(Staff::class, 'staff_id');
+    }
 
-	public function payments()
-	{
-		return $this->hasMany(Payment::class);
-	}
+    // 🔹 Chi nhánh (nếu có)
+    public function branch()
+    {
+        return $this->belongsTo(Branch::class, 'branch_id');
+    }
 
-	public function reviews()
-	{
-		return $this->hasMany(Review::class);
-	}
+    // 🔹 Các dịch vụ thuộc lịch hẹn này
+    public function details()
+    {
+        return $this->hasMany(AppointmentDetail::class, 'appointment_id');
+    }
+
+    // 🔹 Thanh toán
+    public function payments()
+    {
+        return $this->hasMany(Payment::class, 'appointment_id');
+    }
+
+    // 🔹 Đánh giá
+    public function reviews()
+    {
+        return $this->hasMany(Review::class, 'appointment_id');
+    }
+
+    // 🔹 Tính tổng tiền tự động
+    public function getTotalAmountAttribute()
+    {
+        return $this->details->sum(fn($d) => $d->unit_price * ($d->quantity ?? 1));
+    }
 }

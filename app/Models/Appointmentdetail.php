@@ -1,51 +1,36 @@
 <?php
 
-/**
- * Created by Reliese Model.
- */
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-/**
- * Class Appointmentdetail
- * 
- * @property int $appointment_id
- * @property int $service_id
- * @property int|null $quantity
- * @property float|null $unit_price
- * 
- * @property Appointment $appointment
- * @property Service $service
- *
- * @package App\Models
- */
-class Appointmentdetail extends Model
+class AppointmentDetail extends Model
 {
-	protected $table = 'appointmentdetails';
-	public $incrementing = false;
-	public $timestamps = false;
+    protected $table = 'appointmentdetails';
+    public $incrementing = false;
+    public $timestamps = false;
 
-	protected $casts = [
-		'appointment_id' => 'int',
-		'service_id' => 'int',
-		'quantity' => 'int',
-		'unit_price' => 'float'
-	];
+    protected $casts = [
+        'appointment_id' => 'int',
+        'service_id' => 'int',
+        'quantity' => 'int',
+        'unit_price' => 'float'
+    ];
 
-	protected $fillable = [
-		'quantity',
-		'unit_price'
-	];
+    protected $fillable = [
+        'appointment_id',
+        'service_id',
+        'quantity',
+        'unit_price'
+    ];
 
-	public function appointment()
-	{
-		return $this->belongsTo(Appointment::class);
-	}
+    public function appointment()
+    {
+        return $this->belongsTo(Appointment::class, 'appointment_id');
+    }
 
-	public function service()
-	{
-		return $this->belongsTo(Service::class);
-	}
+    public function service()
+    {
+        return $this->belongsTo(Service::class, 'service_id');
+    }
 }
