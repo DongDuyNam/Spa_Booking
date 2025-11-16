@@ -10,7 +10,7 @@ class User extends Authenticatable
     use Notifiable;
 
     protected $table = 'users';
-    protected $primaryKey = 'user_id'; 
+    protected $primaryKey = 'user_id';
     public $timestamps = true;
 
     protected $fillable = [
@@ -34,4 +34,16 @@ class User extends Authenticatable
     {
         return $this->password_hash;
     }
+
+    public function customerData()
+    {
+        return $this->hasOne(Customer::class, 'user_id', 'user_id');
+    }
+
+    public function staff()
+    {
+        return $this->hasOne(Staff::class, 'user_id', 'user_id');
+    }
+
+
 }

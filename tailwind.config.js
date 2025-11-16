@@ -16,6 +16,9 @@ export default {
                 // lora: ["Lora", ...defaultTheme.fontFamily.serif],
                 playfair: ["Playfair Display", ...defaultTheme.fontFamily.serif],
             },
+            clipPath: {
+                'trapezoid': 'polygon(10% 0%, 100% 0%, 90% 100%, 0% 100%)',
+            },
         },
         colors: {
             transparent: "transparent",
@@ -44,5 +47,8 @@ export default {
             
         },
     },
-    plugins: [forms],
+    plugins: [forms,
+        require('@tailwindcss/typography'),
+        require('tailwind-clip-path'),
+    ],
 };

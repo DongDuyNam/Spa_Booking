@@ -6,15 +6,26 @@ use App\Http\Controllers\Web\StaffController;
 use App\Http\Controllers\Web\CustomerController;
 use App\Http\Controllers\Web\LoginController;
 use App\Http\Controllers\Web\RegisterController;
-use App\Http\Controllers\Web\ScheduleController;
+use App\Http\Controllers\Web\StaffScheduleController;
 use App\Http\Controllers\Web\BookingController;
+use App\Http\Controllers\Web\ServiceController;
+use App\Http\Controllers\Web\Admin\CustomerController as AdminCustomerController;
+use App\Http\Controllers\Web\Customer\DashboardController as CustomerDashboardController;
 
-// Trang chủ
-Route::get('/', function () {
-    return view('home');
-})->name('home');
+/*
+|--------------------------------------------------------------------------
+| Trang chủ + Đặt lịch
+|--------------------------------------------------------------------------
+*/
 
-// ================== AUTH ==================
+Route::get('/', [BookingController::class, 'index'])->name('home');
+Route::post('/booking', [BookingController::class, 'store'])->name('booking.store');
+
+/*
+|--------------------------------------------------------------------------
+| AUTH (Đăng nhập / Đăng ký / Đăng xuất)
+|--------------------------------------------------------------------------
+*/
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login']);
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
@@ -22,34 +33,50 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
 Route::post('/register', [RegisterController::class, 'register']);
 
-
-Route::get('/', [BookingController::class, 'index'])->name('home');
-Route::post('/booking', [BookingController::class, 'store'])->name('booking.store');
-
-
-// ================== DASHBOARD (SAU KHI LOGIN) ==================
+/*
+|--------------------------------------------------------------------------
+| DASHBOARD (Tùy theo role)
+|--------------------------------------------------------------------------
+*/
 Route::middleware('auth')->group(function () {
 
-    // Admin dashboard
-    Route::middleware('role:1')->get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
+    // ----------------- ADMIN -----------------
+    Route::middleware('role:1')
+        ->prefix('admin')
+        ->name('admin.')
+        ->group(function () {
+            Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
 
-    // Staff dashboard
-    Route::middleware('role:2')->get('/staff/dashboard', [StaffController::class, 'index'])->name('staff.dashboard');
+            // Quản lý khách hàng (admin)
+            Route::resource('customers', CustomerController::class);
 
-    // Customer dashboard
-    Route::middleware('role:3')->get('/customer/dashboard', [CustomerController::class, 'index'])->name('customer.dashboard');
-});
+            // Quản lý nhân viên
+            Route::resource('staffs', StaffController::class);
 
-// ================== QUẢN LÝ (ADMIN ONLY) ==================
-// ================== QUẢN LÝ (ADMIN ONLY) ==================
-Route::prefix('admin')
-    ->name('admin.')
-    ->middleware(['auth', 'role:1'])
-    ->group(function () {
-        Route::resource('customers', \App\Http\Controllers\Web\CustomerController::class);
-        Route::resource('staffs', \App\Http\Controllers\Web\StaffController::class);
-        Route::resource('schedule', \App\Http\Controllers\Web\ScheduleController::class)
-              ->only(['index', 'create', 'store', 'destroy']);
+            // Quản lý lịch làm việc
+            Route::resource('schedules', StaffScheduleController::class)
+                ->only(['index', 'store', 'update', 'destroy']);
+
+            // Quản lý dịch vụ
+            Route::resource('services', ServiceController::class)
+                ->only(['index', 'store', 'update', 'destroy']);
+
+            // Xuất lich excel
+            Route::get('schedules-export', [StaffScheduleController::class, 'export'])
+                ->name('admin.schedules.export');
+        });
+
+    // ----------------- STAFF -----------------
+    Route::middleware('role:2')->group(function () {
+        Route::get('/staff/dashboard', [StaffController::class, 'index'])->name('staff.dashboard');
     });
 
+    // ----------------- CUSTOMER -----------------
+    // Route::middleware('role:3')->group(function () {
+    //     Route::get('/customer/dashboard', [CustomerDashboardController::class, 'index'])
+    //         ->name('customer.dashboard');
+    // });
 
+
+
+});

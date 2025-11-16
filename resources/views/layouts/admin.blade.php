@@ -28,19 +28,52 @@
             </a>
 
             <a href="#" class="block rounded-lg px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white">Lịch hẹn</a>
-            <a href="#" class="block rounded-lg px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white">Dịch vụ</a>
-            <a href="#" class="block rounded-lg px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white">Nhân viên
-                &amp; Lịch làm</a>
-
+            <div x-data="{ open: true }" class="relative">
+                <!-- Nút tiêu đề -->
+                <a href="#" @click.prevent="open = !open"
+                    class="block rounded-lg px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white">
+                    Dịch vụ
+                </a>
+                <!-- Danh sách con -->
+                <div x-show="open" x-transition class="mt-1 ml-6 space-y-1">
+                    <a href="{{ route('admin.services.index') }}" class="block px-4 py-2 text-sm rounded hover:bg-gray-700 hover:text-white
+                  {{ request()->routeIs('admin.services.*') ? 'text-pink-400' : 'text-gray-300' }}">
+                        Danh sách dịch vụ
+                    </a>
+                </div>
+            </div>
+            <div x-data="{ open: true }" class="relative">
+                <!-- Nút tiêu đề -->
+                <a href="#" @click.prevent="open = !open"
+                    class="block rounded-lg px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white">
+                    Nhân viên & Lịch làm
+                </a>
+                <!-- Danh sách con -->
+                <div x-show="open" x-transition class="mt-1 ml-6 space-y-1">
+                    <a href="{{ route('admin.staffs.index') }}" class="block px-4 py-2 text-sm rounded hover:bg-gray-700 hover:text-white
+                  {{ request()->routeIs('admin.staffs.*') ? 'text-pink-400' : 'text-gray-300' }}">
+                        Danh sách nhân viên
+                    </a>
+                    <a href="{{ route('admin.schedules.index') }}" class="block px-4 py-2 text-sm rounded hover:bg-gray-700 hover:text-white
+                  {{ request()->routeIs('admin.schedules.*') ? 'text-pink-400' : 'text-gray-300' }}">
+                        Lịch làm nhân viên
+                    </a>
+                </div>
+            </div>
             <a href="{{ route('admin.customers.index') }}"
                 class="block rounded-lg px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white">
                 Khách hàng
             </a>
 
-            <a href="#" class="block rounded-lg px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white">Doanh thu</a>
-            <a href="#" class="block rounded-lg px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white">Khuyến mãi / Ưu đãi</a>
-            <a href="#" class="block rounded-lg px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white">Đánh giá</a>
-            <a href="#" class="block rounded-lg px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white">Cài đặt</a>
+            <a href="#" class="block rounded-lg px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white">Doanh
+                thu</a>
+            <a href="#" class="block rounded-lg px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white">Khuyến
+                mãi /
+                Ưu đãi</a>
+            <a href="#" class="block rounded-lg px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white">Đánh
+                giá</a>
+            <a href="#" class="block rounded-lg px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white">Cài
+                đặt</a>
         </nav>
 
         <div class="p-4 border-t border-gray-700 text-sm text-gray-400">
@@ -57,17 +90,19 @@
         <header class="w-full bg-[#FFF0F3] border-b border-pink-100 flex items-center justify-between px-6 py-4">
             <div>
                 <div class="text-sm text-gray-500">Xin chào,</div>
-                <div class="text-xl font-semibold text-pink-600">Ngọc Anh 🌸</div>
+                <div class="text-xl font-semibold text-pink-600">{{ Auth::user()->full_name }} 🌸</div>
                 <div class="text-xs text-gray-400 mt-1">Chúc bạn một ngày rực rỡ 💖</div>
             </div>
 
             <div class="flex items-center space-x-4">
                 <div>
                     <label class="block text-xs text-gray-500 mb-1">Chi nhánh</label>
-                    <select class="bg-white border border-pink-200 text-gray-700 text-sm rounded-lg px-3 py-2 focus:ring-pink-300 focus:outline-none">
-                        <option>The Muse Beauty Spa - Q1</option>
-                        <option>Greenleaf Wellness - Q3</option>
-                        <option>Queen Nails & Hair - HN</option>
+                    <select class="bg-white border border-pink-200 text-gray-700 text-sm rounded-lg px-3 py-2"
+                        onchange="window.location='?branch_id='+this.value">
+                        <option value="">Tất cả chi nhánh</option>
+                        <option value="1" {{ request('branch_id') == 1 ? 'selected' : '' }}>Chi nhánh 1</option>
+                        <option value="2" {{ request('branch_id') == 2 ? 'selected' : '' }}>Chi nhánh 2</option>
+                        <option value="3" {{ request('branch_id') == 3 ? 'selected' : '' }}>Chi nhánh 3</option>
                     </select>
                 </div>
 
@@ -75,7 +110,7 @@
                     <img src="https://th.bing.com/th/id/OIP.vmoycMUOmbcs0Vw-1iIdVAHaHa?w=215&h=215"
                         class="w-10 h-10 rounded-full border-2 border-pink-300" alt="avatar">
                     <div class="text-sm leading-tight">
-                        <div class="font-semibold text-gray-700">Ngọc Anh</div>
+                        <div class="font-semibold text-gray-700">{{ Auth::user()->full_name }} 🌸</div>
                         <div class="text-[11px] text-gray-400">Quản lý Spa</div>
                     </div>
                 </div>
@@ -110,4 +145,5 @@
     <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     @stack('scripts')
 </body>
+
 </html>
