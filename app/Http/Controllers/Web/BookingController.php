@@ -2,30 +2,58 @@
 
 namespace App\Http\Controllers\Web;
 
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Models\User;
-use App\Models\Customer;
-use App\Models\Appointment;
-use App\Models\AppointmentDetail;
-use App\Models\Service;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
+use App\Models\User;
+use App\Models\Customer;
+use App\Models\Service;
+use App\Models\ServicePackage;
+use App\Models\Appointment;
+use App\Models\AppointmentDetail;
+use Illuminate\Support\Facades\Http;
 
 class BookingController extends Controller
 {
     public function index()
     {
-        $services = \App\Models\Service::all();
-        return view('home', compact('services'));
+        // Dịch vụ đơn lẻ
+        $services = Service::where('is_active', 1)
+            ->orderByDesc('service_id')
+            ->take(10)
+            ->get();
+
+        // Gói dịch vụ + danh sách service_id trong gói
+        $packages = ServicePackage::where('is_active', 1)
+            ->with('packageServices')
+            ->orderByDesc('package_id')
+            ->take(8)
+            ->get();
+
+        foreach ($packages as $p) {
+            $p->serviceListString = $p->packageServices
+                ->pluck('service_id')
+                ->implode(',');
+        }
+
+        return view('home', compact('services', 'packages'));
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
             'booking_date' => 'required|date|after_or_equal:today',
-            'service_ids' => 'required|array|min:1',
+            'booking_time' => 'required|string',
+
+            'booking_type' => 'required|in:single,package',
+
+            'service_ids' => 'nullable|array',
             'service_ids.*' => 'integer|exists:services,service_id',
+
+            'package_id' => 'nullable|integer|exists:service_packages,package_id',
+
             'full_name' => 'nullable|string|max:255',
             'phone_number' => 'nullable|string|max:20',
             'email' => 'nullable|email|max:255',
@@ -35,68 +63,140 @@ class BookingController extends Controller
         DB::beginTransaction();
 
         try {
-            // 🟢 1. Lấy hoặc tạo User (role_id = 4 nếu khách vãng lai)
+            // USER / CUSTOMER
             $userId = Auth::check()
                 ? Auth::id()
                 : $this->createGuestUser($request);
 
-            // 🟢 2. Tạo hoặc lấy Customer tương ứng (nếu chưa có)
-            $customer = \App\Models\Customer::firstOrCreate(
+            $customer = Customer::firstOrCreate(
                 ['user_id' => $userId],
                 ['loyalty_points' => 0, 'total_spent' => 0]
             );
 
-            // 🟢 3. Tạo Appointment
+            // Gom list service_id từ gói + dịch vụ đơn lẻ
+            $serviceIds = [];
+
+            if (!empty($validated['package_id'])) {
+                $package = ServicePackage::with('packageServices')
+                    ->findOrFail($validated['package_id']);
+
+                $serviceIds = $package->packageServices
+                    ->pluck('service_id')
+                    ->toArray();
+            }
+
+            if (!empty($validated['service_ids'])) {
+                $serviceIds = array_merge($serviceIds, $validated['service_ids']);
+            }
+
+            $serviceIds = array_values(array_unique($serviceIds));
+
+            if (count($serviceIds) === 0) {
+                return back()
+                    ->with('error', '⚠️ Vui lòng chọn dịch vụ hoặc gói dịch vụ.')
+                    ->withInput();
+            }
+
+            $services = Service::whereIn('service_id', $serviceIds)->get();
+
+            if ($services->count() === 0) {
+                return back()
+                    ->with('error', '⚠️ Không tìm thấy dịch vụ hợp lệ.')
+                    ->withInput();
+            }
+
+            if (!empty($validated['package_id'])) {
+
+                // Nếu gói có duration riêng → dùng nó
+                if ($package->duration_minutes && $package->duration_minutes > 0) {
+                    $totalDuration = $package->duration_minutes;
+                } else {
+                    // Không có duration thì tính từ các dịch vụ trong gói
+                    $totalDuration = (int) $services->sum('duration_minutes');
+                }
+
+            } else {
+                // Đặt dịch vụ đơn
+                $totalDuration = (int) $services->sum('duration_minutes');
+            }
+
+            if ($totalDuration <= 0) {
+                $totalDuration = 60; // fallback
+            }
+
+
+            $bookingDate = Carbon::parse($validated['booking_date'])->format('Y-m-d');
+            $chosenTime = $validated['booking_time']
+                ?: $this->pickSlotForDate($bookingDate, $totalDuration);
+
+
+            // Tạo appointment
             $appointment = Appointment::create([
                 'customer_id' => $customer->customer_id,
-                'appointment_date' => $validated['booking_date'],
+                'appointment_date' => $bookingDate,
+                'appointment_time' => $chosenTime,
+                'duration_minutes' => $totalDuration,
                 'note' => $validated['note'] ?? null,
                 'status' => 'pending',
             ]);
 
-            // 🟢 4. Tạo các AppointmentDetail
-            foreach ($validated['service_ids'] as $serviceId) {
-                $service = Service::find($serviceId);
-                \App\Models\AppointmentDetail::create([
+            // Chi tiết dịch vụ
+            foreach ($services as $service) {
+                AppointmentDetail::create([
                     'appointment_id' => $appointment->appointment_id,
-                    'service_id' => $serviceId,
+                    'service_id' => $service->service_id,
                     'quantity' => 1,
                     'unit_price' => $service->price ?? 0,
                 ]);
             }
 
             DB::commit();
-            return back()->with('success', '💖 Đặt lịch thành công! Nhân viên sẽ liên hệ xác nhận sớm.');
+
+            return back()->with(
+                'success',
+                "💖 Đặt lịch thành công vào {$chosenTime} ngày " .
+                Carbon::parse($bookingDate)->format('d/m/Y')
+            );
 
         } catch (\Throwable $ex) {
             DB::rollBack();
             report($ex);
-            return back()->with('error', '⚠️ Có lỗi xảy ra khi đặt lịch. Vui lòng thử lại sau.');
+
+            return back()
+                ->with('error', '⚠️ Lỗi hệ thống, vui lòng thử lại.')
+                ->withInput();
         }
     }
 
-
-    private function createGuestUser(Request $request)
+    public function pickSlotForDate(string $date, int $duration)
     {
-        // Nếu khách đã từng đặt bằng email/số điện thoại thì tái sử dụng
+        $resp = Http::get(url('/slots'), [
+            'date' => $date,
+            'duration' => $duration,
+        ]);
+
+        return $resp->json()['slots'][0] ?? null;
+    }
+
+
+    private function createGuestUser(Request $request): int
+    {
         $existingUser = User::where(function ($q) use ($request) {
-            $q->where('email', $request->email)
-                ->orWhere('phone_number', $request->phone_number);
+            $q->when($request->email, fn($q2) => $q2->orWhere('email', $request->email))
+                ->when($request->phone_number, fn($q2) => $q2->orWhere('phone_number', $request->phone_number));
         })->first();
 
         if ($existingUser) {
             return $existingUser->user_id;
         }
 
-        // Nếu chưa có thì tạo user mới role_id = 4 (khách vãng lai)
         $guest = User::create([
-            'full_name' => $request->full_name ?? 'Khách vãng lai',
+            'full_name' => $request->full_name ?: 'Khách vãng lai',
             'phone_number' => $request->phone_number,
-            'email' => $request->email ?? 'guest_' . now()->timestamp . '@guest.local',
+            'email' => $request->email ?: ('guest_' . now()->timestamp . '@guest.local'),
             'password_hash' => bcrypt('guest_' . now()->timestamp),
-            'role_id' => 4, //  Khách vãng lai
+            'role_id' => 4,
             'status' => 1,
-            'created_at' => now(),
         ]);
 
         return $guest->user_id;

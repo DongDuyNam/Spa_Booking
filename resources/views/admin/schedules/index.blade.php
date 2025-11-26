@@ -202,170 +202,277 @@
             {{ $schedules->appends(request()->query())->links('pagination::tailwind') }}
         </div>
 
+        
+
         {{-- Modal Thêm --}}
-        <template x-teleport="body">
-            <div x-cloak x-show="createModal" class="fixed inset-0 z-[9999] bg-black/50 flex items-center justify-center"
-                x-transition.opacity @keydown.escape.window="createModal = false" @click.self="createModal = false">
-                <div class="bg-white rounded-xl p-6 w-[480px] shadow-lg" x-transition.scale>
-                    <h3 class="text-xl font-semibold text-gray-800 mb-4">Thêm lịch làm mới</h3>
+<template x-teleport="body">
+    <div x-cloak x-show="createModal"
+         class="fixed inset-0 z-[9999] bg-black/50 flex items-center justify-center"
+         x-transition.opacity
+         @keydown.escape.window="createModal = false"
+         @click.self="createModal = false">
 
-                    <form method="POST" action="{{ route('admin.schedules.store') }}">
-                        @csrf
-                        <div class="space-y-3 text-sm">
-                            <div>
-                                <label class="font-medium text-gray-700">Nhân viên</label>
-                                <select name="staff_id" class="w-full border rounded-lg px-3 py-2">
-                                    @foreach($staffs as $st)
-                                        <option value="{{ $st->staff_id }}">
-                                            #{{ $st->staff_id }} -
-                                            {{ optional($st->user)->full_name }}
-                                            ({{ optional($st->user)->phone_number }})
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
+        <div class="bg-white rounded-xl p-6 w-[480px] shadow-lg" x-transition.scale>
+            <h3 class="text-xl font-semibold text-gray-800 mb-4">Thêm lịch làm mới</h3>
 
-                            <div>
-                                <label class="font-medium text-gray-700">Ngày làm</label>
-                                <input type="date" name="work_date" class="w-full border rounded-lg px-3 py-2">
-                            </div>
+            <form method="POST" action="{{ route('admin.schedules.store') }}"
+                  x-data="{
+                    shift: '',
+                    updateTime() {
+                        if (this.shift === 'Sáng') {
+                            this.start = '08:00'
+                            this.end = '12:00'
+                        } else if (this.shift === 'Chiều') {
+                            this.start = '13:00'
+                            this.end = '17:00'
+                        } else if (this.shift === 'Tối') {
+                            this.start = '17:00'
+                            this.end = '21:00'
+                        } else if (this.shift === 'Full') {
+                            this.start = '08:00'
+                            this.end = '21:00'
+                        } else {
+                            this.start = ''
+                            this.end = ''
+                        }
+                    },
+                    start: '',
+                    end: ''
+                  }"
+            >
+                @csrf
 
-                            <div>
-                                <label class="font-medium text-gray-700">Ca làm</label>
-                                <select name="shift" class="w-full border rounded-lg px-3 py-2">
-                                    <option value="Sáng">Ca sáng</option>
-                                    <option value="Chiều">Ca chiều</option>
-                                    <option value="Tối">Ca tối</option>
-                                </select>
-                            </div>
+                <div class="space-y-3 text-sm">
 
-                            <div class="grid grid-cols-2 gap-3">
-                                <div>
-                                    <label class="font-medium text-gray-700">Giờ bắt đầu</label>
-                                    <input type="time" name="start_time" class="w-full border rounded-lg px-3 py-2">
-                                </div>
-                                <div>
-                                    <label class="font-medium text-gray-700">Giờ kết thúc</label>
-                                    <input type="time" name="end_time" class="w-full border rounded-lg px-3 py-2">
-                                </div>
-                            </div>
+                    {{-- Nhân viên --}}
+                    <div>
+                        <label class="font-medium text-gray-700">Nhân viên</label>
+                        <select name="staff_id" class="w-full border rounded-lg px-3 py-2">
+                            @foreach($staffs as $st)
+                                <option value="{{ $st->staff_id }}">
+                                    #{{ $st->staff_id }} - {{ optional($st->user)->full_name }}
+                                    ({{ optional($st->user)->phone_number }})
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
 
-                            <div>
-                                <label class="font-medium text-gray-700">Trạng thái</label>
-                                <select name="status" class="w-full border rounded-lg px-3 py-2">
-                                    <option value="pending">Chờ xác nhận</option>
-                                    <option value="confirmed">Đã xác nhận</option>
-                                    <option value="off">Nghỉ</option>
-                                    <option value="cancelled">Hủy</option>
-                                </select>
-                            </div>
+                    {{-- Ngày --}}
+                    <div>
+                        <label class="font-medium text-gray-700">Ngày làm</label>
+                        <input type="date" name="work_date" class="w-full border rounded-lg px-3 py-2">
+                    </div>
 
-                            <div>
-                                <label class="font-medium text-gray-700">Ghi chú</label>
-                                <textarea name="notes" rows="2" class="w-full border rounded-lg px-3 py-2"></textarea>
-                            </div>
+                    {{-- Ca làm --}}
+                    <div>
+                        <label class="font-medium text-gray-700">Ca làm</label>
+                        <select name="shift"
+                                class="w-full border rounded-lg px-3 py-2"
+                                x-model="shift"
+                                @change="updateTime()">
+                            <option value="Tùy chọn">Tùy chọn</option>
+                            <option value="Sáng">Ca sáng</option>
+                            <option value="Chiều">Ca chiều</option>
+                            <option value="Tối">Ca tối</option>
+                            <option value="Full">Full time</option>
+                        </select>
+                    </div>
+
+                    {{-- Thời gian --}}
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="font-medium text-gray-700">Giờ bắt đầu</label>
+                            <input type="time" name="start_time"
+                                   class="w-full border rounded-lg px-3 py-2"
+                                   x-model="start">
                         </div>
-
-                        <div class="mt-6 text-right">
-                            <button type="button" @click="createModal = false"
-                                class="px-4 py-2 rounded-lg border text-gray-700 hover:bg-gray-100 mr-2">
-                                Hủy
-                            </button>
-                            <button type="submit" class="px-4 py-2 rounded-lg bg-pink-500 text-white hover:bg-pink-600">
-                                Lưu
-                            </button>
+                        <div>
+                            <label class="font-medium text-gray-700">Giờ kết thúc</label>
+                            <input type="time" name="end_time"
+                                   class="w-full border rounded-lg px-3 py-2"
+                                   x-model="end">
                         </div>
-                    </form>
+                    </div>
+
+                    {{-- Trạng thái --}}
+                    <div>
+                        <label class="font-medium text-gray-700">Trạng thái</label>
+                        <select name="status" class="w-full border rounded-lg px-3 py-2">
+                            <option value="pending">Chờ xác nhận</option>
+                            <option value="confirmed">Đã xác nhận</option>
+                            <option value="off">Nghỉ</option>
+                            <option value="cancelled">Hủy</option>
+                        </select>
+                    </div>
+
+                    {{-- Ghi chú --}}
+                    <div>
+                        <label class="font-medium text-gray-700">Ghi chú</label>
+                        <textarea name="notes" rows="2"
+                                  class="w-full border rounded-lg px-3 py-2"></textarea>
+                    </div>
                 </div>
-            </div>
-        </template>
 
-        {{-- Modal Sửa --}}
-        <template x-teleport="body">
-            <div x-cloak x-show="editModal" class="fixed inset-0 z-[9999] bg-black/50 flex items-center justify-center"
-                x-transition.opacity @keydown.escape.window="editModal = false" @click.self="editModal = false">
-                <div class="bg-white rounded-xl p-6 w-[480px] shadow-lg" x-transition.scale>
-                    <h3 class="text-xl font-semibold text-gray-800 mb-4">
-                        Chỉnh sửa lịch làm
-                    </h3>
+                <div class="mt-6 text-right">
+                    <button type="button" @click="createModal = false"
+                            class="px-4 py-2 rounded-lg border text-gray-700 hover:bg-gray-100 mr-2">
+                        Hủy
+                    </button>
 
-                    <form method="POST" :action="'/admin/schedules/' + selected.schedule_id">
-                        @csrf
-                        @method('PUT')
-
-                        <div class="space-y-3 text-sm">
-                            <div>
-                                <label class="font-medium text-gray-700">Nhân viên</label>
-                                <select name="staff_id" x-model="selected.staff_id"
-                                    class="w-full border rounded-lg px-3 py-2">
-                                    @foreach($staffs as $st)
-                                        <option value="{{ $st->staff_id }}">
-                                            #{{ $st->staff_id }} -
-                                            {{ optional($st->user)->full_name }}
-                                            ({{ optional($st->user)->phone_number }})
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-
-                            <div>
-                                <label class="font-medium text-gray-700">Ngày làm</label>
-                                <input type="date" name="work_date" x-model="selected.work_date"
-                                    class="w-full border rounded-lg px-3 py-2">
-                            </div>
-
-                            <div>
-                                <label class="font-medium text-gray-700">Ca làm</label>
-                                <select name="shift" x-model="selected.shift" class="w-full border rounded-lg px-3 py-2">
-                                    <option value="Sáng">Ca sáng</option>
-                                    <option value="Chiều">Ca chiều</option>
-                                    <option value="Tối">Ca tối</option>
-                                </select>
-                            </div>
-
-                            <div class="grid grid-cols-2 gap-3">
-                                <div>
-                                    <label class="font-medium text-gray-700">Giờ bắt đầu</label>
-                                    <input type="time" name="start_time" x-model="selected.start_time"
-                                        class="w-full border rounded-lg px-3 py-2">
-                                </div>
-                                <div>
-                                    <label class="font-medium text-gray-700">Giờ kết thúc</label>
-                                    <input type="time" name="end_time" x-model="selected.end_time"
-                                        class="w-full border rounded-lg px-3 py-2">
-                                </div>
-                            </div>
-
-                            <div>
-                                <label class="font-medium text-gray-700">Trạng thái</label>
-                                <select name="status" x-model="selected.status" class="w-full border rounded-lg px-3 py-2">
-                                    <option value="pending">Chờ xác nhận</option>
-                                    <option value="confirmed">Đã xác nhận</option>
-                                    <option value="off">Nghỉ</option>
-                                    <option value="cancelled">Hủy</option>
-                                </select>
-                            </div>
-
-                            <div>
-                                <label class="font-medium text-gray-700">Ghi chú</label>
-                                <textarea name="notes" rows="2" x-model="selected.notes"
-                                    class="w-full border rounded-lg px-3 py-2"></textarea>
-                            </div>
-                        </div>
-
-                        <div class="mt-6 text-right">
-                            <button type="button" @click="editModal = false"
-                                class="px-4 py-2 rounded-lg border text-gray-700 hover:bg-gray-100 mr-2">
-                                Hủy
-                            </button>
-                            <button type="submit" class="px-4 py-2 rounded-lg bg-pink-500 text-white hover:bg-pink-600">
-                                Lưu
-                            </button>
-                        </div>
-                    </form>
+                    <button type="submit"
+                            class="px-4 py-2 rounded-lg bg-pink-500 text-white hover:bg-pink-600">
+                        Lưu
+                    </button>
                 </div>
-            </div>
-        </template>
+
+            </form>
+        </div>
+
+    </div>
+</template>
+
+{{-- Modal Sửa --}}
+<template x-teleport="body">
+    <div x-cloak x-show="editModal"
+         class="fixed inset-0 z-[9999] bg-black/50 flex items-center justify-center"
+         x-transition.opacity
+         @keydown.escape.window="editModal = false"
+         @click.self="editModal = false">
+
+        <div class="bg-white rounded-xl p-6 w-[480px] shadow-lg" x-transition.scale>
+
+            <h3 class="text-xl font-semibold text-gray-800 mb-4">Chỉnh sửa lịch làm</h3>
+
+            <form method="POST" :action="'/admin/schedules/' + selected.schedule_id"
+                x-data="{
+                    shift: selected.shift,
+                    start: selected.start_time,
+                    end: selected.end_time,
+
+                    init() {
+                        this.$watch('shift', v => this.selected.shift = v);
+                        this.$watch('start', v => this.selected.start_time = v);
+                        this.$watch('end', v => this.selected.end_time = v);
+                    },
+
+                    updateTime() {
+                        if (this.shift === 'Sáng') {
+                            this.start = '08:00';
+                            this.end = '12:00';
+                        } else if (this.shift === 'Chiều') {
+                            this.start = '13:00';
+                            this.end = '17:00';
+                        } else if (this.shift === 'Tối') {
+                            this.start = '17:00';
+                            this.end = '21:00';
+                        } else if (this.shift === 'Full') {
+                            this.start = '08:00';
+                            this.end = '21:00';
+                        }
+                    }
+                }"
+            >
+
+                @csrf
+                @method('PUT')
+
+                <div class="space-y-3 text-sm">
+
+                    {{-- Nhân viên --}}
+                    <div>
+                        <label class="font-medium text-gray-700">Nhân viên</label>
+                        <select name="staff_id" x-model="selected.staff_id"
+                                class="w-full border rounded-lg px-3 py-2">
+                            @foreach($staffs as $st)
+                                <option value="{{ $st->staff_id }}">
+                                    #{{ $st->staff_id }} -
+                                    {{ optional($st->user)->full_name }}
+                                    ({{ optional($st->user)->phone_number }})
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    {{-- Ngày --}}
+                    <div>
+                        <label class="font-medium text-gray-700">Ngày làm</label>
+                        <input type="date" name="work_date"
+                               x-model="selected.work_date"
+                               class="w-full border rounded-lg px-3 py-2">
+                    </div>
+
+                    {{-- Ca làm --}}
+                    <div>
+                        <label class="font-medium text-gray-700">Ca làm</label>
+                        <select name="shift"
+                                x-model="shift"
+                                @change="updateTime()"
+                                class="w-full border rounded-lg px-3 py-2">
+
+                            <option value="Tùy chọn">Tùy chọn</option>
+                            <option value="Sáng">Ca sáng</option>
+                            <option value="Chiều">Ca chiều</option>
+                            <option value="Tối">Ca tối</option>
+                            <option value="Full">Full time</option>
+                        </select>
+                    </div>
+
+                    {{-- Thời gian --}}
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="font-medium text-gray-700">Giờ bắt đầu</label>
+                            <input type="time" name="start_time"
+                                   x-model="start"
+                                   class="w-full border rounded-lg px-3 py-2">
+                        </div>
+                        <div>
+                            <label class="font-medium text-gray-700">Giờ kết thúc</label>
+                            <input type="time" name="end_time"
+                                   x-model="end"
+                                   class="w-full border rounded-lg px-3 py-2">
+                        </div>
+                    </div>
+
+                    {{-- Trạng thái --}}
+                    <div>
+                        <label class="font-medium text-gray-700">Trạng thái</label>
+                        <select name="status" x-model="selected.status" class="w-full border rounded-lg px-3 py-2">
+                            <option value="pending">Chờ xác nhận</option>
+                            <option value="confirmed">Đã xác nhận</option>
+                            <option value="off">Nghỉ</option>
+                            <option value="cancelled">Hủy</option>
+                        </select>
+                    </div>
+
+                    {{-- Ghi chú --}}
+                    <div>
+                        <label class="font-medium text-gray-700">Ghi chú</label>
+                        <textarea name="notes" rows="2"
+                                  x-model="selected.notes"
+                                  class="w-full border rounded-lg px-3 py-2"></textarea>
+                    </div>
+
+                </div>
+
+                <div class="mt-6 text-right">
+                    <button type="button" @click="editModal = false"
+                            class="px-4 py-2 rounded-lg border text-gray-700 hover:bg-gray-100 mr-2">
+                        Hủy
+                    </button>
+
+                    <button type="submit"
+                            class="px-4 py-2 rounded-lg bg-pink-500 text-white hover:bg-pink-600">
+                        Lưu
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+</template>
+
     </div>
 
     @push('scripts')

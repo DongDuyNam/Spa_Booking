@@ -4,6 +4,6 @@
 
 @section('content')
     @include('components.hero')
-    @include('components.featured_spa')
+    @include('components.packages_spa')
     @include('components.favorite_services')
 @endsection

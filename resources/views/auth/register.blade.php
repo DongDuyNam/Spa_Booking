@@ -8,10 +8,10 @@
 
         <!-- Name -->
         <div>
-            <x-input-label for="name" :value="__('Họ và tên')" class="text-gray" />
-            <x-text-input id="name" class="block mt-1 w-full  bg-primary-0" type="text" name="name" :value="old('name')"
-                required autofocus autocomplete="name" />
-            <x-input-error :messages="$errors->get('name')" class="mt-2" />
+            <x-input-label for="full_name" :value="__('Họ và tên')" class="text-gray" />
+            <x-text-input id="full_name" class="block mt-1 w-full bg-primary-0" type="text" name="full_name"
+                :value="old('full_name')" required autofocus autocomplete="name" />
+            <x-input-error :messages="$errors->get('full_name')" class="mt-2" />
         </div>
 
         <!-- Email Address -->

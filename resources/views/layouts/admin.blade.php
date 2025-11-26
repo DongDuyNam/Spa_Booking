@@ -6,6 +6,11 @@
     <title>Dashboard - AnhDuongSpa Admin</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        [x-cloak] {
+            display: none !important;
+        }
+    </style>
 </head>
 
 <body class="bg-[#FFF8F9] text-gray-800 flex min-h-screen">
@@ -28,42 +33,100 @@
             </a>
 
             <a href="#" class="block rounded-lg px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white">Lịch hẹn</a>
-            <div x-data="{ open: true }" class="relative">
-                <!-- Nút tiêu đề -->
-                <a href="#" @click.prevent="open = !open"
-                    class="block rounded-lg px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white">
-                    Dịch vụ
-                </a>
-                <!-- Danh sách con -->
-                <div x-show="open" x-transition class="mt-1 ml-6 space-y-1">
+            <div x-data="menuSection('menu_services')" class="relative">
+
+                <button @click="toggle()" class="w-full flex items-center justify-between rounded-lg px-4 py-3
+               text-gray-300 hover:bg-gray-800 hover:text-white">
+
+                    <span class="flex items-center space-x-2">
+                        <span>Dịch vụ</span>
+                    </span>
+
+                    <svg :class="open ? 'rotate-90' : ''" class="w-4 h-4 transform transition-transform duration-200"
+                        fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M9 5l7 7-7 7" />
+                    </svg>
+                </button>
+
+                <div x-show="open" x-transition x-cloak class="mt-1 ml-6 space-y-1">
+
                     <a href="{{ route('admin.services.index') }}" class="block px-4 py-2 text-sm rounded hover:bg-gray-700 hover:text-white
                   {{ request()->routeIs('admin.services.*') ? 'text-pink-400' : 'text-gray-300' }}">
-                        Danh sách dịch vụ
+                        ... Danh sách dịch vụ
+                    </a>
+
+                    <a href="{{ route('admin.servicepackages.index') }}" class="block px-4 py-2 text-sm rounded hover:bg-gray-700 hover:text-white
+                  {{ request()->routeIs('admin.servicepackages.*') ? 'text-pink-400' : 'text-gray-300' }}">
+                        ... Danh sách gói dịch vụ
                     </a>
                 </div>
             </div>
-            <div x-data="{ open: true }" class="relative">
-                <!-- Nút tiêu đề -->
-                <a href="#" @click.prevent="open = !open"
-                    class="block rounded-lg px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white">
-                    Nhân viên & Lịch làm
-                </a>
-                <!-- Danh sách con -->
-                <div x-show="open" x-transition class="mt-1 ml-6 space-y-1">
+
+            <div x-data="menuSection('menu_staff')" class="relative">
+
+                <button @click="toggle()" class="w-full flex items-center justify-between rounded-lg px-4 py-3
+               text-gray-300 hover:bg-gray-800 hover:text-white">
+
+                    <span>Nhân viên & Lịch làm</span>
+
+                    <svg :class="open ? 'rotate-90' : ''" class="w-4 h-4 transform transition-transform duration-200"
+                        fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M9 5l7 7-7 7" />
+                    </svg>
+                </button>
+
+                <div x-show="open" x-transition x-cloak class="mt-1 ml-6 space-y-1">
+
                     <a href="{{ route('admin.staffs.index') }}" class="block px-4 py-2 text-sm rounded hover:bg-gray-700 hover:text-white
-                  {{ request()->routeIs('admin.staffs.*') ? 'text-pink-400' : 'text-gray-300' }}">
-                        Danh sách nhân viên
+                {{ request()->routeIs('admin.staffs.*') ? 'text-pink-400' : 'text-gray-300' }}">
+                        ... Danh sách nhân viên
                     </a>
+
                     <a href="{{ route('admin.schedules.index') }}" class="block px-4 py-2 text-sm rounded hover:bg-gray-700 hover:text-white
-                  {{ request()->routeIs('admin.schedules.*') ? 'text-pink-400' : 'text-gray-300' }}">
-                        Lịch làm nhân viên
+                {{ request()->routeIs('admin.schedules.*') ? 'text-pink-400' : 'text-gray-300' }}">
+                        ... Lịch làm nhân viên
                     </a>
+
                 </div>
             </div>
-            <a href="{{ route('admin.customers.index') }}"
-                class="block rounded-lg px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white">
-                Khách hàng
-            </a>
+
+            <div x-data="menuSection('menu_customer')" class="relative">
+
+                <button @click="toggle()" class="w-full flex items-center justify-between rounded-lg px-4 py-3
+               text-gray-300 hover:bg-gray-800 hover:text-white">
+
+                    <span>Khách hàng</span>
+
+                    <svg :class="open ? 'rotate-90' : ''" class="w-4 h-4 transform transition-transform duration-200"
+                        fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M9 5l7 7-7 7" />
+                    </svg>
+                </button>
+
+                <div x-show="open" x-transition x-cloak class="mt-1 ml-6 space-y-1">
+
+                    <a href="{{ route('admin.customers.index') }}" class="block px-4 py-2 text-sm rounded hover:bg-gray-700 hover:text-white
+                {{ request()->routeIs('admin.customers.*') ? 'text-pink-400' : 'text-gray-300' }}">
+                        ... Danh sách khách hàng
+                    </a>
+
+                    <a href="{{ route('admin.customers.index') }}" class="block px-4 py-2 text-sm rounded hover:bg-gray-700 hover:text-white
+                {{ request()->routeIs('admin.customers.*') ? 'text-pink-400' : 'text-gray-300' }}">
+                        ... Chi tiết khách hàng
+                    </a>
+
+                    <a href="{{ route('admin.customers.index') }}" class="block px-4 py-2 text-sm rounded hover:bg-gray-700 hover:text-white
+                {{ request()->routeIs('admin.customers.*') ? 'text-pink-400' : 'text-gray-300' }}">
+                        ... Quản lý gói dịch vụ / liệu trình
+                    </a>
+
+                    <a href="{{ route('admin.customers.index') }}" class="block px-4 py-2 text-sm rounded hover:bg-gray-700 hover:text-white
+                {{ request()->routeIs('admin.customers.*') ? 'text-pink-400' : 'text-gray-300' }}">
+                        ... Feedback / đánh giá khách hàng
+                    </a>
+
+                </div>
+            </div>
 
             <a href="#" class="block rounded-lg px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white">Doanh
                 thu</a>
@@ -144,6 +207,19 @@
     {{-- Load AlpineJS & Script Stack --}}
     <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     @stack('scripts')
+
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('menuSection', (key) => ({
+                open: localStorage.getItem(key) === 'true' ? true : false,
+
+                toggle() {
+                    this.open = !this.open;
+                    localStorage.setItem(key, this.open);
+                }
+            }));
+        });
+    </script>
 </body>
 
 </html>

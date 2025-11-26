@@ -15,7 +15,6 @@ class LoginController extends Controller
 
     public function login(Request $request)
     {
-        // Validate input
         $request->validate([
             'email' => 'required|email',
             'password' => 'required|string|min:3',
@@ -31,10 +30,14 @@ class LoginController extends Controller
             switch ($user->role_id) {
                 case 1:
                     return redirect()->intended('/admin/dashboard');
+
                 case 2:
                     return redirect()->intended('/staff/dashboard');
+
                 case 3:
-                    return redirect()->intended('/customer/dashboard');
+                    // KHÁCH HÀNG → về trang chủ
+                    return redirect()->route('home');
+
                 default:
                     return redirect()->route('home');
             }

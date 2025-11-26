@@ -65,20 +65,54 @@
                 </li>
             </ul>
         </div>
-        <div class="flex items-center md:order-2 space-x-2">
+        <div class="flex items-center md:order-2 space-x-3">
+
             @guest
                 <a href="{{ route('login') }}"
-                    class="text-white bg-primary-150 hover:bg-primary-200 px-5 py-2.5 rounded-lg font-serif">Đăng nhập</a>
+                    class="text-white bg-primary-150 hover:bg-primary-200 px-5 py-2.5 rounded-lg font-serif">
+                    Đăng nhập
+                </a>
                 <a href="{{ route('register') }}"
-                    class="text-white bg-primary-150 hover:bg-primary-200 px-5 py-2.5 rounded-lg font-serif">Đăng ký</a>
+                    class="text-white bg-primary-150 hover:bg-primary-200 px-5 py-2.5 rounded-lg font-serif">
+                    Đăng ký
+                </a>
             @else
-                <span class="text-gray-700 font-serif">Xin chào, {{ Auth::user()->full_name }}</span>
-                <form action="{{ route('logout') }}" method="POST" class="inline">
-                    @csrf
-                    <button type="submit"
-                        class="text-white bg-primary-150 hover:bg-primary-200 px-5 py-2.5 rounded-lg font-serif">Đăng
-                        xuất</button>
-                </form>
+                <div x-data="{ open:false }" class="relative">
+                    <button @click="open = !open" class="flex items-center space-x-2 focus:outline-none">
+                        <img src="{{ Auth::user()->avatar ?? '/image/default-avatar.png' }}"
+                            class="w-10 h-10 rounded-full border-2 border-primary-150 object-cover">
+                        <span class="font-serif text-gray-700 hidden md:block">
+                            {{ Auth::user()->full_name }}
+                        </span>
+                        <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" stroke-width="2"
+                            viewBox="0 0 24 24">
+                            <path d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+
+                    {{-- Dropdown --}}
+                    <div x-show="open" @click.outside="open=false"
+                        class="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg py-2 z-50"
+                        x-transition.opacity>
+                        <a href="{{ route('customer.dashboard') }}"
+                            class="block px-4 py-2 text-gray-700 hover:bg-primary-75">
+                            🏠 Trang cá nhân
+                        </a>
+                        <a href="{{ route('customer.appointments') }}" class="block px-4 py-2 text-gray-700 hover:bg-primary-75">
+                            📅 Lịch hẹn của tôi
+                        </a>
+
+                        <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-primary-75">
+                            💆 Gói dịch vụ đã mua
+                        </a>
+                        <form action="{{ route('logout') }}" method="POST">
+                            @csrf
+                            <button class="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50">
+                                🚪 Đăng xuất
+                            </button>
+                        </form>
+                    </div>
+                </div>
             @endguest
         </div>
     </div>

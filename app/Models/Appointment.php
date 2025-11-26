@@ -18,7 +18,8 @@ class Appointment extends Model
         'customer_id' => 'int',
         'staff_id' => 'int',
         'branch_id' => 'int',
-        'appointment_date' => 'datetime',
+        'appointment_date' => 'date:Y-m-d',
+        'appointment_time' => 'string',   
         'duration_minutes' => 'int',
         'total_amount' => 'float',
     ];
@@ -28,6 +29,7 @@ class Appointment extends Model
         'staff_id',
         'branch_id',
         'appointment_date',
+        'appointment_time',   
         'duration_minutes',
         'note',
         'status',
