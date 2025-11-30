@@ -62,29 +62,41 @@ class ServiceController extends Controller
      * Lưu dịch vụ mới
      */
     public function store(Request $request)
-    {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'duration_minutes' => 'required|integer|min:1',
-            'price' => 'required|numeric|min:0',
-            'category' => 'required|string|max:100',
-            'is_active' => 'required|integer|in:0,1',
-        ]);
+{
+    $request->validate([
+        'name' => 'required|string|max:255',
+        'description' => 'nullable|string',
+        'duration_minutes' => 'required|integer|min:1',
+        'price' => 'required|numeric|min:0',
+        'category' => 'required|string|max:100',
+        'thumbnail' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+        'is_active' => 'required|integer|in:0,1',
+    ]);
 
-        Service::create([
-            'name' => $request->name,
-            'description' => $request->description,
-            'duration_minutes' => $request->duration_minutes,
-            'price' => $request->price,
-            'category' => $request->category,
-            'is_active' => $request->is_active,
-        ]);
+    $data = $request->only([
+        'name', 'description', 'duration_minutes',
+        'price', 'category', 'is_active'
+    ]);
 
-        return redirect()
-            ->route('admin.services.index')
-            ->with('success', 'Thêm dịch vụ mới thành công!');
+    // Xử lý thumbnail (nếu có)
+    if ($request->hasFile('thumbnail')) {
+
+        $file = $request->file('thumbnail');
+        $filename = time() . '_' . $file->getClientOriginalName();
+
+        // Lưu vào storage/app/public/thumbnails
+        $path = $file->storeAs('thumbnails', $filename, 'public');
+
+        $data['thumbnail'] = $path;
     }
+
+    Service::create($data);
+
+    return redirect()
+        ->route('admin.services.index')
+        ->with('success', 'Thêm dịch vụ mới thành công!');
+}
+
 
 
     /**
@@ -102,31 +114,40 @@ class ServiceController extends Controller
      * Xử lý cập nhật
      */
     public function update(Request $request, $id)
-    {
-        $service = Service::findOrFail($id);
+{
+    $service = Service::findOrFail($id);
 
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'duration_minutes' => 'required|integer|min:1',
-            'price' => 'required|numeric|min:0',
-            'category' => 'required|string|max:100',
-            'is_active' => 'required|integer|in:0,1',
-        ]);
+    $request->validate([
+        'name' => 'required|string|max:255',
+        'description' => 'nullable|string',
+        'duration_minutes' => 'required|integer|min:1',
+        'price' => 'required|numeric|min:0',
+        'category' => 'required|string|max:100',
+        'thumbnail' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+        'is_active' => 'required|integer|in:0,1',
+    ]);
 
-        $service->update([
-            'name' => $request->name,
-            'description' => $request->description,
-            'duration_minutes' => $request->duration_minutes,
-            'price' => $request->price,
-            'category' => $request->category,
-            'is_active' => $request->is_active,
-        ]);
+    $data = $request->only([
+        'name', 'description', 'duration_minutes',
+        'price', 'category', 'is_active'
+    ]);
 
-        return redirect()
-            ->route('admin.services.index')
-            ->with('success', "Cập nhật dịch vụ #{$id} thành công!");
+    if ($request->hasFile('thumbnail')) {
+
+        $file = $request->file('thumbnail');
+        $filename = time() . '_' . $file->getClientOriginalName();
+        $path = $file->storeAs('thumbnails', $filename, 'public');
+
+        $data['thumbnail'] = $path;
     }
+
+    $service->update($data);
+
+    return redirect()
+        ->route('admin.services.index')
+        ->with('success', "Cập nhật dịch vụ #{$id} thành công!");
+}
+
 
 
     /**

@@ -30,4 +30,9 @@ class Staff extends Model
     {
         return $this->hasMany(StaffSchedule::class, 'staff_id', 'staff_id');
     }
+
+    public function appointments()
+    {
+        return $this->hasMany(Appointment::class, 'staff_id', 'staff_id');
+    }
 }

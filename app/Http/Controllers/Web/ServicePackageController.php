@@ -15,17 +15,16 @@ class ServicePackageController extends Controller
     {
         $query = ServicePackage::orderByDesc('package_id');
 
-        // Lọc theo từ khóa
         if ($request->filled('keyword')) {
-            $keyword = $request->keyword;
-
-            $query->where('name', 'like', "%$keyword%");
+            $keyword = trim($request->keyword);
+            $query->where('name', 'like', "%{$keyword}%");
         }
 
-        $packages = $query->paginate(10);
+        $packages = $query->paginate(10)->withQueryString();
 
         return view('admin.servicepackages.index', compact('packages'));
     }
+
 
     public function store(Request $request)
     {

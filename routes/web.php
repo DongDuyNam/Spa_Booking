@@ -5,13 +5,15 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Web\BookingController;
 use App\Http\Controllers\Web\LoginController;
 use App\Http\Controllers\Web\RegisterController;
-
 use App\Http\Controllers\Web\AdminController;
+use App\Http\Controllers\Web\AdminAppointmentController;
 use App\Http\Controllers\Web\StaffController;
 use App\Http\Controllers\Web\CustomerController;
 use App\Http\Controllers\Web\ServiceController;
 use App\Http\Controllers\Web\ServicePackageController;
 use App\Http\Controllers\Web\StaffScheduleController;
+use App\Http\Controllers\Web\PromotionController;
+use App\Http\Controllers\Web\ReviewController;
 
 use App\Http\Controllers\Api\SlotController;
 
@@ -27,7 +29,7 @@ Route::post('/booking', [BookingController::class, 'store'])->name('booking.stor
 
 /*
 |--------------------------------------------------------------------------
-| API SLOT CHUẨN – CHỈ DÙNG SlotController (PRO MAX)
+| API SLOT
 |--------------------------------------------------------------------------
 */
 Route::get('/api/slots', [SlotController::class, 'getSlots'])->name('api.slots');
@@ -53,9 +55,9 @@ Route::post('/register', [RegisterController::class, 'register']);
 Route::middleware('auth')->group(function () {
 
     /*
-    |--------------------------------------------------------------------------
+    |----------------------------------------------------------------------
     | ADMIN (ROLE = 1)
-    |--------------------------------------------------------------------------
+    |----------------------------------------------------------------------
     */
     Route::middleware('role:1')
         ->prefix('admin')
@@ -65,6 +67,7 @@ Route::middleware('auth')->group(function () {
             Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
 
             Route::resource('customers', CustomerController::class);
+
             Route::resource('staffs', StaffController::class);
 
             Route::resource('schedules', StaffScheduleController::class)
@@ -74,12 +77,66 @@ Route::middleware('auth')->group(function () {
                 ->only(['index', 'store', 'update', 'destroy']);
 
             Route::resource('servicepackages', ServicePackageController::class);
+
+            Route::resource('promotions', PromotionController::class);
+
+            Route::get(
+                'promotions/{promotion}/toggle',
+                [PromotionController::class, 'toggle']
+            )->name('promotions.toggle');
+
+            Route::resource('reviews', ReviewController::class);
+
+            Route::get(
+                'reviews/{review}/toggle',
+                [ReviewController::class, 'toggle']
+            )->name('reviews.toggle');
+
+            Route::post(
+                'reviews/{review}/reply',
+                [ReviewController::class, 'reply']
+            )->name('reviews.reply');
+
+            /*
+            |--------------------------------------------------------------
+            | APPOINTMENTS - LỊCH HẸN
+            |--------------------------------------------------------------
+            */
+            Route::resource('appointments', AdminAppointmentController::class)
+                ->only(['index', 'update']);
+
+
+            Route::post(
+                'appointments/{appointment}/cancel',
+                [AdminAppointmentController::class, 'cancel']
+            )->name('appointments.cancel');
+
+            Route::post(
+                'appointments/{appointment}/assign',
+                [AdminAppointmentController::class, 'assign']
+            )->name('appointments.assign');
+
+            // ✅ AJAX: Lấy nhân viên có lịch làm theo ngày
+            Route::get(
+                'appointments/staff-by-date/{date}',
+                [AdminAppointmentController::class, 'getStaffByDate']
+            )->name('appointments.staffByDate');
+
+            Route::get(
+                'appointments/available-staff',
+                [AdminAppointmentController::class, 'getAvailableStaff']
+            )->name('appointments.availableStaff');
+
+            Route::get(
+                'appointments/{appointment}/available-staff',
+                [AdminAppointmentController::class, 'getAvailableStaff']
+            )->name('appointments.availableStaff');
         });
 
     /*
-    |--------------------------------------------------------------------------
+    |----------------------------------------------------------------------
     | STAFF (ROLE = 2)
-    |--------------------------------------------------------------------------
+    |----------------------------------------------------------------------
     */
     Route::middleware('role:2')->group(function () {
         Route::get('/staff/dashboard', [StaffController::class, 'index'])
@@ -87,9 +144,9 @@ Route::middleware('auth')->group(function () {
     });
 
     /*
-    |--------------------------------------------------------------------------
+    |----------------------------------------------------------------------
     | CUSTOMER (ROLE = 3)
-    |--------------------------------------------------------------------------
+    |----------------------------------------------------------------------
     */
     Route::middleware(['role:3'])
         ->prefix('customer')
@@ -108,7 +165,7 @@ Route::middleware('auth')->group(function () {
             Route::get('/appointments', [CustomerDashboardController::class, 'appointments'])
                 ->name('appointments');
 
-            // APT detail
+            // DETAIL
             Route::get('/appointment/{id}', [CustomerDashboardController::class, 'apiGetAppointment'])
                 ->name('appointment.api');
 

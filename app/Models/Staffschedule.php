@@ -14,9 +14,9 @@ class StaffSchedule extends Model
 {
     use HasFactory;
 
-    protected $table = 'staffschedules';
+    protected $table = 'staff_schedules';
+
     protected $primaryKey = 'schedule_id';
-    public $timestamps = true;
 
     protected $fillable = [
         'staff_id',

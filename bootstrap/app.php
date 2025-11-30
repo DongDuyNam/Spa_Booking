@@ -13,12 +13,11 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
 
-    // ⭐ THÊM BLOCK NÀY
     ->withProviders([
         App\Providers\AppServiceProvider::class,
-        App\Providers\ViewServiceProvider::class, // ⬅️ Provider mới của anh
+        App\Providers\ViewServiceProvider::class, 
+        
     ])
-    // ⭐ HẾT BLOCK
 
     ->withMiddleware(function (Middleware $middleware): void {
 

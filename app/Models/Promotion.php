@@ -24,23 +24,23 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Promotion extends Model
 {
-	protected $table = 'promotions';
-	protected $primaryKey = 'promotion_id';
-	public $timestamps = false;
+    protected $primaryKey = 'promotion_id';
 
-	protected $casts = [
-		'discount_percent' => 'float',
-		'valid_from' => 'datetime',
-		'valid_to' => 'datetime',
-		'is_active' => 'bool'
-	];
+    public $timestamps = false;
 
-	protected $fillable = [
-		'code',
-		'description',
-		'discount_percent',
-		'valid_from',
-		'valid_to',
-		'is_active'
-	];
+    protected $fillable = [
+        'code',
+        'description',
+        'discount_percent',
+        'valid_from',
+        'valid_to',
+        'is_active'
+    ];
+
+    protected $casts = [
+        'valid_from' => 'date',
+        'valid_to'   => 'date'
+    ];
 }
+
+

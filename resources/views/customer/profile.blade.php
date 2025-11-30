@@ -31,7 +31,7 @@
             class="block mt-6 w-full text-center bg-primary-150 text-white py-2 rounded-lg font-serif hover:bg-primary-200">
             Cập nhật hồ sơ
         </button>
-    </div>
+    </div> 
 
 
     <!-- 🟣 Popup Modal -->

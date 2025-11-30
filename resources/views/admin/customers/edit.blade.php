@@ -4,7 +4,7 @@
 <div x-data="{ show: true, saved: false }" class="relative">
     <div x-show="show" 
          x-transition.opacity.scale.duration.300ms
-         class=" flex items-center justify-center z-40">
+         class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-40">
         <div class="bg-white rounded-xl shadow-xl w-[480px] p-6 transform transition-all scale-95"
              x-transition.scale>
             <h2 class="text-2xl font-bold text-gray-800 mb-4 text-center">Chỉnh sửa khách hàng</h2>

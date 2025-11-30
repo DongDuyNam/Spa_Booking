@@ -227,7 +227,6 @@
 
                     <form method="POST" :action="'/admin/services/' + selected.service_id" enctype="multipart/form-data">
 
-
                         @csrf
                         @method('PUT')
 
